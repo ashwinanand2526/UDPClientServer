@@ -1,0 +1,57 @@
+import os
+import socket
+import json
+import binascii
+localIP     = "127.0.0.1"
+localPort   = 20002
+bufferSize  = 1024
+
+msgFromServer   = "Hello UDP Client"
+audioPathEn	= "./Audio-files/English/"
+WLC		= "Welcome.mp3"
+TFS		= "ThankYou.mp3"
+bytesToSend     = str.encode(msgFromServer)
+
+# Create a datagram socket
+UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+# Bind to address and ip
+UDPServerSocket.bind((localIP, localPort))
+
+print("UDP server up and listening")
+
+class Switcher(object):
+     def Notify(self,i):
+	load_dict = json.loads(i)
+	method_name='_'+str(load_dict['noti_id'])
+	method=getattr(self,method_name,lambda :'Invalid')
+	return method(load_dict)
+     def _noti_checkin(self,d):
+    	if d['checkin_status'] == 1:
+			file = WLC
+		else:
+			file = TFS
+		return file
+     def _noti_hello(self,d):
+        return 'Invalid'
+
+S=Switcher()
+# Listen for incoming datagrams
+while(True):
+    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+    message = bytesAddressPair[0]
+    address = bytesAddressPair[1]
+
+    msg = message.decode("utf-8")
+#    print("msg type:"+str(type(msg)))
+    print("Notification received (IP,port): "+ str(address) + msg)
+    file = S.Notify(msg)  
+    print("Playing file:" +str(file))
+	
+	#Play any audio in other desired language if required.
+    #if (file != "Invalid"):
+	#    os.system("mpg123 "+ audioPathEn + file)
+    if (file == WLC or file == TFS):
+	    os.system("mpg123 "+ audioPathEn + file)
+    # Sending a reply to client
+   # UDPServerSocket.sendto(bytesToSend, address)

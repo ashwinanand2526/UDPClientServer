@@ -1,0 +1,26 @@
+import sys
+import socket
+print("WLC = Welcome.mp3")
+print("TFS = ThankYou.mp3")
+
+print(sys.argv[1])
+if (sys.argv[1] == "WLC"):
+	msgFromClient   = "{\"noti_id\":\"noti_checkin\",\"username\":\"Ashwin\",\"checkin_status\":1}"
+elif (sys.argv[1] == "TFS"):
+	msgFromClient   = "{\"noti_id\":\"noti_checkin\",\"username\":\"Ashwin\",\"checkin_status\":0}"
+else:
+	msgFromClient   = "{\"noti_id\":\"noti_hello\",\"message\":\"Hello UDP Server\"}"
+
+bytesToSend         = str.encode(msgFromClient)
+serverAddressPort   = ("127.0.0.1", 20002)
+bufferSize          = 1024
+
+# Create a UDP socket at client side
+UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+# Send to server using created UDP socket
+UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+
+#msgFromServer = UDPClientSocket.recvfrom(bufferSize)
+#msg = "Message from Server {}".format(msgFromServer[0])
+#print(msg)
